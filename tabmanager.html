@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TabLib - Tab Manager</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <body>
+    <div class="sticky-header" id="stickyHeader">
+      <header>
+        <h1>🗂️ TabLib</h1>
+        <div class="search-container">
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search tabs... (Ctrl+F)"
+            autofocus
+          />
+          <button
+            id="searchModeToggle"
+            class="search-mode-toggle"
+            title="Toggle search mode"
+          >
+            <span class="mode-icon">✨</span>
+            <span class="mode-text">Fuzzy</span>
+          </button>
+          <span class="search-count" id="searchCount"></span>
+        </div>
+      </header>
+
+      <div class="toolbar">
+        <div class="selection-info">
+          <span id="selectionCount">0 selected</span>
+          <button id="selectAllBtn" class="btn-secondary">Select All</button>
+          <button id="deselectAllBtn" class="btn-secondary">
+            Deselect All
+          </button>
+        </div>
+        <div class="view-controls">
+          <label for="viewModeSelect" class="view-label">View:</label>
+          <select id="viewModeSelect" class="view-mode-select">
+            <option value="compact" selected>Compact</option>
+            <option value="normal">Normal</option>
+            <option value="cozy">Cozy</option>
+          </select>
+          <button
+            id="showUrlToggle"
+            class="btn-icon-small"
+            title="Toggle URL visibility"
+            style="display: none"
+          >
+            <span class="url-icon">🔗</span>
+          </button>
+          <select
+            id="copyFormatSelect"
+            class="view-mode-select"
+            title="Link copy format"
+          >
+            <option value="plain">Plain</option>
+            <option value="markdown" selected>Markdown</option>
+            <option value="html">HTML</option>
+          </select>
+        </div>
+        <div class="actions">
+          <button
+            id="optimizeWindowsBtn"
+            class="btn-optimize"
+            title="Optimize windows: merge small, split large"
+          >
+            ⚡ Optimize Windows
+          </button>
+          <button
+            id="copyLinksBtn"
+            class="btn-secondary"
+            disabled
+            title="Copy selected tab links"
+          >
+            📋 Copy Links
+          </button>
+          <button id="moveToNewWindowBtn" class="btn-primary" disabled>
+            Move to New Window
+          </button>
+          <button id="closeSelectedBtn" class="btn-danger" disabled>
+            Close Selected
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="keyboard-hints">
+        <span>💡 Tips: </span>
+        <span><kbd>Ctrl+Click</kbd> multi-select</span>
+        <span><kbd>Shift+Click</kbd> range select</span>
+        <span><kbd>Ctrl+A</kbd> select all</span>
+        <span><kbd>Delete</kbd> close selected</span>
+      </div>
+
+      <div id="windowsContainer" class="windows-container"></div>
+
+      <!-- Floating Paste Button -->
+      <button
+        id="pasteLinksBtn"
+        class="floating-paste-btn"
+        title="Paste & Open Links"
+      >
+        📥 Paste Links
+      </button>
+
+      <!-- Floating Feedback Button -->
+      <button
+        id="feedbackBtn"
+        class="floating-feedback-btn"
+        title="Provide feedback"
+      >
+        💬 Feedback
+      </button>
+    </div>
+
+    <!-- Paste Links Modal -->
+    <div id="pasteModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>📥 Paste & Open Links</h2>
+          <button class="modal-close" id="closeModal">✕</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-description">
+            Paste your links here (Plain URLs, Markdown, or HTML format)
+          </p>
+          <textarea
+            id="pasteTextarea"
+            placeholder="Paste links here...&#10;&#10;Examples:&#10;https://github.com&#10;https://stackoverflow.com&#10;&#10;or&#10;&#10;[GitHub](https://github.com)&#10;[Stack Overflow](https://stackoverflow.com)"
+          ></textarea>
+
+          <div class="paste-options">
+            <label class="paste-option">
+              <input type="radio" name="openMode" value="new-window" checked />
+              <span>Open in New Window</span>
+            </label>
+            <label class="paste-option">
+              <input type="radio" name="openMode" value="current-window" />
+              <span>Open in Current Window</span>
+            </label>
+          </div>
+
+          <div class="modal-footer">
+            <button id="cancelPasteBtn" class="btn-secondary">Cancel</button>
+            <button id="openLinksBtn" class="btn-primary">Open Links</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Window Optimization Modal -->
+    <div id="optimizeModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>⚡ Optimize Windows</h2>
+          <button class="modal-close" id="closeOptimizeModal">✕</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-description">
+            Automatically organize your windows for better management
+          </p>
+
+          <div class="optimize-settings">
+            <div class="setting-row">
+              <label>
+                <span class="setting-label">Minimum tabs per window:</span>
+                <input
+                  type="number"
+                  id="minTabsPerWindow"
+                  value="5"
+                  min="1"
+                  max="20"
+                />
+              </label>
+              <span class="setting-hint"
+                >Windows with fewer tabs will be merged</span
+              >
+            </div>
+
+            <div class="setting-row">
+              <label>
+                <span class="setting-label">Maximum tabs per window:</span>
+                <input
+                  type="number"
+                  id="maxTabsPerWindow"
+                  value="15"
+                  min="5"
+                  max="50"
+                />
+              </label>
+              <span class="setting-hint"
+                >Windows with more tabs will be split</span
+              >
+            </div>
+          </div>
+
+          <div class="preview-section">
+            <div class="preview-header-label">📋 Planned Changes:</div>
+            <div id="optimizationPreview" class="optimization-preview"></div>
+          </div>
+
+          <div class="modal-footer">
+            <button id="cancelOptimizeBtn" class="btn-secondary">Cancel</button>
+            <button id="applyOptimizeBtn" class="btn-primary" disabled>
+              Apply Changes
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+      <span id="toastMessage"></span>
+    </div>
+
+    <script src="tabmanager.js"></script>
+  </body>
+</html>
