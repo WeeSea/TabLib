@@ -2,7 +2,7 @@
 
 let allWindows = [];
 let selectedTabs = new Set();
-let lastSelectedIndex = null;
+let lastSelectedTabId = null;
 let searchResults = new Set();
 let isFuzzySearch = true; // Search mode: true = fuzzy, false = normal
 let viewMode = 'compact'; // View mode: compact, normal, cozy
@@ -423,7 +423,7 @@ function createTabElement(
       return; // Already handled
     }
 
-    handleTabClick(tab.id, tabIndex, e);
+    handleTabClick(tab.id, e);
   });
 
   closeBtn.addEventListener('click', (e) => {
@@ -435,28 +435,49 @@ function createTabElement(
 }
 
 // Handle tab click with multi-selection
-function handleTabClick(tabId, tabIndex, event) {
-  if (event.ctrlKey || event.metaKey) {
-    // Ctrl+Click: Toggle individual selection
-    toggleTabSelection(tabId);
-    lastSelectedIndex = tabIndex;
-  } else if (event.shiftKey && lastSelectedIndex !== null) {
-    // Shift+Click: Range selection
-    const start = Math.min(lastSelectedIndex, tabIndex);
-    const end = Math.max(lastSelectedIndex, tabIndex);
+function handleTabClick(tabId, event) {
+  // Get all visible tab elements in order
+  const allTabElements = Array.from(document.querySelectorAll('.tab-item'));
+  const currentIndex = allTabElements.findIndex(el => parseInt(el.dataset.tabId) === tabId);
 
-    // Get all visible tabs
-    const allTabElements = Array.from(document.querySelectorAll('.tab-item'));
-    for (let i = start; i <= end && i < allTabElements.length; i++) {
-      const tid = parseInt(allTabElements[i].dataset.tabId);
-      if (!selectedTabs.has(tid)) {
+  // Find anchor index
+  let anchorIndex = null;
+  if (lastSelectedTabId !== null) {
+    anchorIndex = allTabElements.findIndex(el => parseInt(el.dataset.tabId) === lastSelectedTabId);
+    if (anchorIndex === -1) {
+      lastSelectedTabId = null; // Anchor tab not visible
+    }
+  }
+
+  if (event.ctrlKey || event.metaKey) {
+    // Ctrl+Click: Switch to tab
+    chrome.tabs.update(tabId, { active: true });
+    chrome.windows.update(getWindowIdForTab(tabId), { focused: true });
+  } else if (event.shiftKey) {
+    // Shift+Click: Range selection
+    if (anchorIndex === null) {
+      // First shift+click: set anchor and select this tab
+      lastSelectedTabId = tabId;
+      toggleTabSelection(tabId);
+    } else {
+      // Subsequent shift+click: clear previous and select range
+      selectedTabs.clear();
+      // Update UI for deselection
+      document.querySelectorAll('.tab-item.selected').forEach(el => el.classList.remove('selected'));
+      document.querySelectorAll('.tab-checkbox').forEach(cb => cb.checked = false);
+
+      const start = Math.min(anchorIndex, currentIndex);
+      const end = Math.max(anchorIndex, currentIndex);
+
+      for (let i = start; i <= end; i++) {
+        const tid = parseInt(allTabElements[i].dataset.tabId);
         toggleTabSelection(tid);
       }
     }
   } else {
-    // Regular click: Switch to tab
-    chrome.tabs.update(tabId, { active: true });
-    chrome.windows.update(getWindowIdForTab(tabId), { focused: true });
+    // Regular click: Select tab and set anchor
+    toggleTabSelection(tabId);
+    lastSelectedTabId = tabId;
   }
 }
 
