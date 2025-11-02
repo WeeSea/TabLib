@@ -748,6 +748,11 @@ function setupEventListeners() {
     chrome.tabs.create({ url: 'https://forms.gle/GLzELXohcmaKVDFd6' });
   });
 
+  // Donate button
+  document.getElementById('donateBtn').addEventListener('click', () => {
+    chrome.tabs.create({ url: 'https://pages.razorpay.com/pl_RYz2lOykzXmYXN/view' });
+  });
+
   // Close optimize modal on outside click
   document.getElementById('optimizeModal').addEventListener('click', (e) => {
     if (e.target.id === 'optimizeModal') {

@@ -766,7 +766,7 @@ button:disabled {
 /* Floating Paste Button */
 .floating-paste-btn {
   position: fixed;
-  bottom: 90px;
+  bottom: 130px;
   right: 30px;
   padding: 12px 24px;
   background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
@@ -793,7 +793,7 @@ button:disabled {
 /* Floating Feedback Button */
 .floating-feedback-btn {
   position: fixed;
-  bottom: 30px;
+  bottom: 80px;
   right: 30px;
   padding: 12px 24px;
   background: linear-gradient(135deg, #1a73e8 0%, #4285f4 100%);
@@ -817,7 +817,32 @@ button:disabled {
   transform: translateY(0);
 }
 
-/* Modal */
+/* Floating Donate Button */
+.floating-donate-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(255, 107, 53, 0.4);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 999;
+}
+
+.floating-donate-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 53, 0.5);
+}
+
+.floating-donate-btn:active {
+  transform: translateY(0);
+}
 .modal {
   display: none;
   position: fixed;
